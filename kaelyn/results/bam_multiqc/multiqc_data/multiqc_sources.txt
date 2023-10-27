@@ -1,0 +1,11 @@
+Module	Section	Sample Name	Source
+FastQC	all_sections	null_2_doxo	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_2_doxo.sorted_fastqc.zip
+FastQC	all_sections	null_1_doxo	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_1_doxo.sorted_fastqc.zip
+FastQC	all_sections	null_3_control	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_3_control.sorted_fastqc.zip
+FastQC	all_sections	wt_1_control	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/wt_1_control.sorted_fastqc.zip
+FastQC	all_sections	het_1_control	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/het_1_control.sorted_fastqc.zip
+FastQC	all_sections	null_2_control	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_2_control.sorted_fastqc.zip
+FastQC	all_sections	wt_1_doxo	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/wt_1_doxo.sorted_fastqc.zip
+FastQC	all_sections	null_3_doxo	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_3_doxo.sorted_fastqc.zip
+FastQC	all_sections	het_1_doxo	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/het_1_doxo.sorted_fastqc.zip
+FastQC	all_sections	null_1_control	/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc/sorted_bam/null_1_control.sorted_fastqc.zip

@@ -1,0 +1,53 @@
+[2023-10-12 21:59:32,274] multiqc                                            [DEBUG  ]  No MultiQC config found: /home/long.kae/.conda/envs/binf6430/lib/python2.7/site-packages/multiqc-1.0.dev0-py2.7.egg/multiqc_config.yaml
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  No MultiQC config found: /home/long.kae/.multiqc_config.yaml
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  No MultiQC config found: multiqc_config.yaml
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  Command used: /home/long.kae/.conda/envs/binf6430/bin/multiqc -o /courses/BINF6430.202410/students/long.kae/final_project/results/multiqc /courses/BINF6430.202410/students/long.kae/final_project/data/fastqc
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  Could not connect to multiqc.info for version check
+[2023-10-12 21:59:32,275] multiqc                                            [INFO   ]  This is MultiQC v1.0.dev0
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  Command     : /home/long.kae/.conda/envs/binf6430/bin/multiqc -o /courses/BINF6430.202410/students/long.kae/final_project/results/multiqc /courses/BINF6430.202410/students/long.kae/final_project/data/fastqc
+[2023-10-12 21:59:32,275] multiqc                                            [DEBUG  ]  Working dir : /courses/BINF6430.202410/students/long.kae/final_project/scripts
+[2023-10-12 21:59:32,276] multiqc                                            [INFO   ]  Template    : default
+[2023-10-12 21:59:32,277] multiqc                                            [INFO   ]  Searching '/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc'
+[2023-10-12 21:59:32,277] multiqc                                            [DEBUG  ]  Analysing modules: custom_content, peddy, methylQA, qualimap, preseq, quast, rseqc, busco, goleft_indexcov, snpeff, gatk, htseq, bcftools, featureCounts, picard, prokka, samblaster, samtools, bamtools, bismark, hicup, salmon, kallisto, slamdunk, star, tophat, bowtie2, bowtie1, cutadapt, trimmomatic, skewer, fastq_screen, fastqc, clusterflow
+[2023-10-12 21:59:32,277] multiqc                                            [DEBUG  ]  Using temporary directory for creating report: /tmp/tmpINtrok
+[2023-10-12 21:59:34,339] multiqc.modules.custom_content.custom_content      [DEBUG  ]  No custom content found
+[2023-10-12 21:59:34,371] multiqc.modules.peddy.peddy                        [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:34,393] multiqc.modules.methylQA.methylQA                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:34,421] multiqc.modules.qualimap.QM_BamQC                  [DEBUG  ]  Using default Qualimap thresholds: 1, 5, 10, 30, 50
+[2023-10-12 21:59:34,441] multiqc.modules.qualimap.qualimap                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:34,630] multiqc.modules.preseq.preseq                      [DEBUG  ]  Could not find any preseq data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:34,650] multiqc.modules.quast.quast                        [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,283] multiqc.modules.rseqc.rseqc                        [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,303] multiqc.modules.busco.busco                        [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,324] multiqc.modules.goleft_indexcov.goleft_indexcov    [DEBUG  ]  Did not find goleft indexcov outputs in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,477] multiqc.modules.snpeff.snpeff                      [DEBUG  ]  Could not find any data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,629] multiqc.modules.gatk.gatk                          [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,783] multiqc.modules.htseq.htseq                        [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,937] multiqc.modules.bcftools.bcftools                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:35,956] multiqc.modules.featureCounts.feature_counts       [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:37,380] multiqc.modules.picard.picard                      [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:37,407] multiqc.modules.prokka.prokka                      [DEBUG  ]  Could not find any Prokka data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:37,562] multiqc.modules.samblaster.samblaster              [DEBUG  ]  Could not find any data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,002] multiqc.modules.samtools.samtools                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,154] multiqc.modules.bamtools.bamtools                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,189] multiqc.modules.bismark.bismark                    [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,209] multiqc.modules.hicup.hicup                        [DEBUG  ]  Could not find any HiCUP data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,234] multiqc.modules.salmon.salmon                      [DEBUG  ]  Could not find any Salmon data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:38,386] multiqc.modules.kallisto.kallisto                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,214] multiqc.modules.slamdunk.slamdunk                  [DEBUG  ]  No slamdunk reports found.
+[2023-10-12 21:59:39,241] multiqc.modules.star.star                          [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,265] multiqc.modules.tophat.tophat                      [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,422] multiqc.modules.bowtie2.bowtie2                    [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,576] multiqc.modules.bowtie1.bowtie1                    [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,743] multiqc.modules.cutadapt.cutadapt                  [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:39,898] multiqc.modules.trimmomatic.trimmomatic            [DEBUG  ]  Could not find any Trimmomatic data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:40,055] multiqc.modules.skewer.skewer                      [DEBUG  ]  Could not find any data in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:40,078] multiqc.modules.fastq_screen.fastq_screen          [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:40,386] multiqc.modules.fastqc.fastqc                      [INFO   ]  Found 40 reports
+[2023-10-12 21:59:44,245] multiqc.modules.clusterflow.clusterflow            [DEBUG  ]  Could not find any reports in ('/courses/BINF6430.202410/students/long.kae/final_project/data/fastqc',)
+[2023-10-12 21:59:44,248] multiqc                                            [INFO   ]  Report      : ../results/multiqc/multiqc_report.html
+[2023-10-12 21:59:44,252] multiqc                                            [INFO   ]  Data        : ../results/multiqc/multiqc_data
+[2023-10-12 21:59:44,252] multiqc                                            [DEBUG  ]  Moving data file from '/tmp/tmpINtrok/multiqc_data/multiqc_fastqc.txt' to '/courses/BINF6430.202410/students/long.kae/final_project/results/multiqc/multiqc_data'
+[2023-10-12 21:59:44,257] multiqc                                            [DEBUG  ]  Moving data file from '/tmp/tmpINtrok/multiqc_data/multiqc_general_stats.txt' to '/courses/BINF6430.202410/students/long.kae/final_project/results/multiqc/multiqc_data'
+[2023-10-12 21:59:44,262] multiqc                                            [DEBUG  ]  Moving data file from '/tmp/tmpINtrok/multiqc_data/multiqc_sources.txt' to '/courses/BINF6430.202410/students/long.kae/final_project/results/multiqc/multiqc_data'
+[2023-10-12 21:59:44,545] multiqc                                            [INFO   ]  MultiQC complete

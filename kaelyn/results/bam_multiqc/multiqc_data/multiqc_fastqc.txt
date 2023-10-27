@@ -1,0 +1,11 @@
+Sample	adapter_content	Sequences flagged as poor quality	sequence_duplication_levels	avg_sequence_length	Encoding	per_base_sequence_quality	sequence_length_distribution	Sequence length	File type	basic_statistics	per_sequence_gc_content	Total Sequences	per_base_n_content	per_base_sequence_content	overrepresented_sequences	%GC	total_deduplicated_percentage	Filename	per_sequence_quality_scores
+het_1_control	pass	0.0	warn	145.420159713	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	42379820.0	pass	fail	pass	49.0	56.3051294689	het_1_control.sorted.bam	pass
+het_1_doxo	pass	0.0	warn	146.185067968	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	37706336.0	pass	fail	pass	50.0	54.800124129	het_1_doxo.sorted.bam	pass
+null_1_control	pass	0.0	warn	146.931995806	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	39576706.0	pass	fail	pass	50.0	52.3431344243	null_1_control.sorted.bam	pass
+null_1_doxo	pass	0.0	fail	145.973079749	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	36070318.0	pass	fail	pass	51.0	48.473509525	null_1_doxo.sorted.bam	pass
+null_2_control	pass	0.0	warn	146.386128473	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	37881713.0	pass	fail	pass	51.0	56.6684300101	null_2_control.sorted.bam	pass
+null_2_doxo	pass	0.0	warn	146.353755057	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	41191626.0	pass	fail	pass	51.0	56.1427630353	null_2_doxo.sorted.bam	pass
+null_3_control	pass	0.0	warn	146.151087677	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	pass	40305716.0	pass	fail	pass	48.0	54.8570735838	null_3_control.sorted.bam	pass
+null_3_doxo	pass	0.0	warn	146.571996718	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	38734231.0	pass	fail	pass	50.0	60.6467167163	null_3_doxo.sorted.bam	pass
+wt_1_control	pass	0.0	warn	146.298393156	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	39801677.0	pass	fail	pass	51.0	57.9777263675	wt_1_control.sorted.bam	pass
+wt_1_doxo	pass	0.0	warn	146.660654792	Sanger / Illumina 1.9	pass	warn	35-150	Conventional base calls	pass	warn	40648109.0	pass	fail	pass	51.0	54.4099357933	wt_1_doxo.sorted.bam	pass
