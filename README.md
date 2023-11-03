@@ -5,9 +5,10 @@ This README document provides an overview of the transcriptomics analysis perfor
 
 ## Analysis Pipeline
 1. Data Preprocessing
+Raw RNASeq fastq files were retrieved from GSE123168 data set.
 Raw RNA-seq data was quality-checked using FastQC and MultiQC.
 Reads were aligned to the mouse reference genome (e.g., mm10) using HISAT.
-Read counts were quantified using [xyz tool].
+Read counts were quantified using featurecounts.
 2. Differential Expression Analysis
 Differential expression analysis was performed using [xyz tool].
 The analysis compared knockout mice samples with control samples to identify upregulated and downregulated genes.
