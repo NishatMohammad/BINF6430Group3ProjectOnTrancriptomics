@@ -5,7 +5,7 @@
 echo "Loading Environment"
 module load miniconda3/23.5.2
 source activate binf6430
-#conda install -c bioconda subread
+##conda install -c bioconda subread
 
 
 # Define Dirs and files
