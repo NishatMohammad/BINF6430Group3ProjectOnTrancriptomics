@@ -1,0 +1,724 @@
+---
+title: "GO_Analysis_GSEA_BINF6430"
+author: "Dakota Jones"
+date: "2023-11-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, include=FALSE}
+# Usage DeSeq2.R
+
+if (!requireNamespace("BiocManager","dplyr", quietly = TRUE)) {
+  install.packages("BiocManager","dplyr")
+}
+BiocManager::install(c("DESeq2", "biomaRt", "clusterProfiler", "org.Mm.eg.db", "enrichplot", "DOSE", "pathview"))
+
+install.packages("tibble")
+library(biomaRt)
+library(clusterProfiler)
+library(enrichplot)
+library(DOSE)
+library(org.Mm.eg.db)
+library(tibble)
+library(DESeq2)
+library(dplyr)
+library(pathview)
+library(ggplot2)
+
+```
+
+
+## Differential Expression
+```{r}
+
+# Read the count matrix from the file
+CountMatrix <- read.table("CountMatrix.tsv", header = TRUE, row.names = 1, sep = "\t")
+
+
+# Create a factor for treatment groups
+SampleNames <- colnames(CountMatrix)
+
+TreatmentFactor <- factor(
+  ifelse(grepl("doxo", SampleNames), "DoxorubicinTreated", "control")
+)
+TreatmentFactor
+
+# Create a factor for biological groups (null, het, wt) regardless of treatment
+BioFactor <- factor(
+  ifelse(grepl("null", SampleNames), "Homozygous",
+         ifelse(grepl("het", SampleNames), "Heterozygous",
+                ifelse(grepl("wt", SampleNames), "WildType", "Other"))
+  )
+)
+BioFactor
+
+#Create a NotWT factor
+NotWTFactor <- factor(ifelse(grepl("wt", SampleNames), "WildType", "Other"))
+NotWTFactor
+
+
+# Create a colData2 object with sample names and the 'treatment_factor',  'biological_group_factor', and NotWT
+colData2 <- data.frame(sampleName = SampleNames,
+                       Treatment = TreatmentFactor,
+                       BioGroup = BioFactor,
+                       NotWT = NotWTFactor)
+colData2
+
+# Design formula
+design <- ~Treatment + BioGroup
+# Create DESeqDataSet object for all samples
+ddsAll <- DESeqDataSetFromMatrix(countData = CountMatrix, colData = colData2, design = design )
+ddsAll <- DESeq(ddsAll)
+AllGrpsResults <- results(ddsAll)
+AllGrpsResults
+SortedAllGrpRes <- AllGrpsResults[order(AllGrpsResults$pvalue, decreasing = TRUE), ]
+SortedAllGrpRes
+AllGenes <- as.data.frame(SortedAllGrpRes)
+AllGenes <- rownames_to_column(AllGenes, var ="gene")
+write.csv(AllGenes, "Deseq2AllGenes.csv",   quote = FALSE, row.names = FALSE)
+
+
+# Create DESeqDataSet object for treatment samples
+dds <- DESeqDataSetFromMatrix(countData = CountMatrix, colData = colData2, design = ~Treatment)
+dds <- DESeq(dds)
+RxResults <- results(dds)
+RxResults
+SortedRxRes <- RxResults[order(RxResults$pvalue, decreasing = TRUE), ]
+SortedRxRes
+RxGenes <- as.data.frame(SortedRxRes)
+RxGenes <- rownames_to_column(RxGenes, var ="gene")
+write.csv(RxGenes, "Deseq2RxGenes.csv", quote = FALSE, row.names = FALSE)
+
+
+# Create DESeqDataSet object for Biological groups samples
+dds2 <- DESeqDataSetFromMatrix(countData = CountMatrix, colData = colData2, design = ~BioGroup)
+dds2 <- DESeq(dds2)
+BioGrpResults <- results(dds2)
+BioGrpResults
+SortedBioGrpRes <- BioGrpResults[order(BioGrpResults$pvalue, decreasing = TRUE), ]
+SortedBioGrpRes
+BioGrpGenes <- as.data.frame(SortedBioGrpRes)
+BioGrpGenes <- rownames_to_column(BioGrpGenes, var ="gene")
+write.csv(BioGrpGenes, "Deseq2BioGrpGenes.csv", quote = FALSE, row.names = FALSE)
+
+
+# Create DESeqDataSet object for Biological Groups focusing on WT vs Homozygous samples
+ddsCol2 <- DESeqDataSetFromMatrix(countData = CountMatrix, colData = colData2, design = ~BioGroup)
+ddsCol2 <- DESeq(ddsCol2)
+BioGrpCol2WtHomoResults <- results(ddsCol2, contrast=c("BioGroup","WildType","Homozygous"))
+BioGrpCol2WtHomoResults
+BioGrpCol2WtHomoRes <- BioGrpCol2WtHomoResults[order(BioGrpCol2WtHomoResults$pvalue, decreasing = TRUE), ]
+BioGrpCol2WtHomoRes
+WTHomoGenes <- as.data.frame(BioGrpCol2WtHomoRes)
+WTHomoGenes
+WTHomoGenes <- rownames_to_column(WTHomoGenes, var ="gene")
+write.csv(WTHomoGenes, "Deseq2WTHomoGenes.csv", quote = FALSE, row.names = FALSE)
+
+# For WT vs Homo and Het
+ddsCol3 <- DESeqDataSetFromMatrix(countData = CountMatrix, colData = colData2, design = ~NotWT)
+#view(colData2)
+ddsCol3 <- DESeq(ddsCol3)
+BioGrpCol2WtAllResults <- results(ddsCol3, contrast=c("NotWT","Other","WildType"))
+BioGrpCol2WtAllResults
+BioGrpCol2WtAllRes <- BioGrpCol2WtAllResults[order(BioGrpCol2WtAllResults$pvalue, decreasing = TRUE), ]
+BioGrpCol2WtAllRes
+WtOtherGenes <- as.data.frame(BioGrpCol2WtAllRes)
+WtOtherGenes <- rownames_to_column(WtOtherGenes, var ="gene")
+WtOtherGenes
+write.csv(WtOtherGenes, "Deseq2WtOtherGenes.csv", quote = FALSE, row.names = FALSE)
+```
+
+## PCA
+```{r}
+
+#BioGroup PCA
+vs_ddscol2 <- vst(ddsCol2, blind = FALSE)
+biogroup_pca <- plotPCA(vs_ddscol2, intgroup = "BioGroup")
+final_bg_pca <- biogroup_pca + labs(title = "BioGroup PCA")
+ggsave("biogroup_pca_plot.png", final_bg_pca, width = 8, height = 6, dpi = 300)
+
+#Treatment PCA
+vs_treatment <- vst(dds, blind = FALSE)
+vs_treatment_pca <-plotPCA(vs_treatment, intgroup=c("Treatment"))
+final_treatment_pca <- vs_treatment_pca + labs(title = "PCA Control Vs Treatment")
+ggsave("treatment_pca_plot.png", final_treatment_pca, width = 8, height = 6, dpi = 300)
+
+#Treatment + BioGroup PCA
+vs_biogroup_treatment <- vst(ddsAll, blind=FALSE)
+biogroup_treatment_pca <- plotPCA(vs_biogroup_treatment, intgroup = c("BioGroup","Treatment"))
+final_bg_treatment_pca <- biogroup_treatment_pca + labs(title = "Treatment + BioGroup PCA")
+ggsave("biogroup_treatment_pca_plot.png", final_bg_treatment_pca, width = 8, height = 6, dpi = 300)
+
+gene_of_interest <- "Sall2"
+
+#Extract normalized counts for the gene
+sall2_counts <- counts(ddsAll, normalized = TRUE)[gene_of_interest,]
+
+WT_sall2_counts <- sall2_counts[ddsAll$BioGroup == "WildType"]
+
+Het_sall2_counts <- sall2_counts[ddsAll$BioGroup == "Heterozygous"]
+
+Homo_sall2_counts <- sall2_counts[ddsAll$BioGroup == "Homozygous"]
+
+WT_sall2_counts
+Het_sall2_counts
+Homo_sall2_counts
+
+
+plot_data <- data.frame(
+  Object = rep(c("WT", "Het", "Homo"), times = c(length(WT_sall2_counts), length(Het_sall2_counts), length(Homo_sall2_counts))),
+  Counts = c(WT_sall2_counts, Het_sall2_counts, Homo_sall2_counts)
+)
+
+
+# Create a grouped bar plot with error bars
+counts_compare <- ggplot(plot_data, aes(x = Object, y = Counts, fill = Object)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  geom_errorbar(aes(ymin = Counts - sd(Counts), ymax = Counts + sd(Counts)), position = position_dodge(width = 0.7), width = 0.25) +
+  labs(title = "Comparison of sall2 Counts by Genotype",
+       x = "Genotype",
+       y = "Counts") +
+  scale_fill_manual(values = c("blue", "yellow", "orange"))+
+  theme_minimal() +
+  theme(
+    panel.background = element_rect(fill = "white", color = NA),
+    plot.background = element_rect(fill = "white"),
+    panel.grid = element_blank(),
+    panel.border = element_blank())
+
+ggsave("counts_compare.png", counts_compare, width = 8, height = 6, dpi = 300)
+
+
+```
+
+
+## gProfiler2 for Wild Type vs. Homozygous Knockout
+```{r}
+
+install.packages("gprofiler2")
+library(gprofiler2)
+
+#filter WTvsHomo Genes for pvalues less than 0.05
+filtered_WT_Homo <- WTHomoGenes %>%
+  filter(WTHomoGenes$pvalue < 0.05)
+filtered_WT_Homo
+
+GO_Terms_WT_Homo <- data.frame(gconvert(query = filtered_WT_Homo$gene, organism = "mmusculus",
+         target="ENSG", mthreshold = Inf, filter_na = TRUE))
+GO_Terms_WT_Homo
+
+results_GSEA_WT_Homo <- gost(query = filtered_WT_Homo$gene, organism = "mmusculus")
+
+results_GSEA_WT_Homo
+plot_WT_Homo <- gostplot(results_GSEA_WT_Homo, capped= FALSE, interactive= TRUE)
+
+plot_WT_Homo
+
+#Order genes by log2FC
+filtered_WT_HOMO_ordered <- filtered_WT_Homo[order(filtered_WT_Homo$log2FoldChange, decreasing = TRUE),]
+
+#ordered enrichment analysis
+WT_Homo_ordered <- gost(list("WT_vs_Homo" = filtered_WT_HOMO_ordered$gene), organism = "mmusculus", ordered_query = TRUE)
+
+
+top_10_go_for_table <- data.frame(head(WT_Homo_ordered$result, 10)) 
+top_10_go_for_table_GO_Terms <- c(top_10_go_for_table$term_id)
+top_10_go_for_table_GO_Terms
+
+#Homo vs WT Plot
+p1 <- gostplot(WT_Homo_ordered, capped= FALSE, interactive = FALSE, )
+
+#Homo vs WT Plot with highlight table 
+publish_homo_wt <- publish_gostplot(p1, highlight_terms = top_10_go_for_table_GO_Terms)
+ggsave("homo_wt_gprofiler_table.png", publish_homo_wt, width = 15, height = 10, dpi = 300)
+
+
+WT_Homo_mod <- WT_Homo_ordered$result[,c("query","source","term_id","term_name","p_value","query_size","intersection_size","term_size","effective_domain_size", "source_order")]
+
+WT_Homo_mod$GeneRatio = paste0(WT_Homo_mod$intersection_size, "/", WT_Homo_mod$query_size)
+
+WT_Homo_mod$BgRatio = paste0(WT_Homo_mod$term_size, "/", WT_Homo_mod$effective_domain_size)
+
+names(WT_Homo_mod) = c("Cluster", "Category", "ID", "Description", "p.adjust", 
+                    "query_size", "Count", "term_size", "effective_domain_size", 
+                    "geneID", "GeneRatio", "BgRatio")
+
+WT_Homo_mod$geneID = gsub(",", "/", WT_Homo_mod$geneID)
+
+row.names(WT_Homo_mod) = WT_Homo_mod$ID
+
+#define as compareClusterResult object
+WT_Homo_mod_cluster = new("compareClusterResult", compareClusterResult = WT_Homo_mod)
+
+
+#define as enrichResult object
+WT_Homo_mod_enrich = new("enrichResult", result = WT_Homo_mod)
+
+enrichplot::dotplot(WT_Homo_mod_cluster)
+
+#Bar plot of enrichment 
+WT_homo_enrich_bar <- barplot(WT_Homo_mod_enrich, showCategory = 10, font.size = 14) +
+  ggplot2::facet_grid(~Cluster) +
+  ggplot2::ylab("Term Name")
+
+ggsave("WT_homo_enrich_bar.png", WT_homo_enrich_bar, width = 8, height = 6, dpi = 300)
+
+```
+
+
+## gProfiler2 for Wild Type vs. Other
+```{r}
+
+install.packages("gprofiler2")
+library(gprofiler2)
+
+#filter WTvsOther Genes for pvalues less than 0.05
+filtered_WT_Other <- WtOtherGenes %>%
+  filter(WtOtherGenes$pvalue < 0.05)
+filtered_WT_Other
+
+GO_Terms_WT_Other <- data.frame(gconvert(query = filtered_WT_Homo$gene, organism = "mmusculus",
+         target="ENSG", mthreshold = Inf, filter_na = TRUE))
+GO_Terms_WT_Other
+
+results_GSEA_WT_Other <- gost(query = filtered_WT_Other$gene, organism = "mmusculus")
+
+results_GSEA_WT_Other
+plot_WT_Other <- gostplot(results_GSEA_WT_Other, capped= FALSE, interactive= TRUE)
+
+plot_WT_Other
+
+#Order genes by log2FC
+filtered_WT_Other_ordered <- filtered_WT_Other[order(filtered_WT_Other$log2FoldChange, decreasing = TRUE),]
+
+#ordered enrichment analysis
+WT_Other_ordered <- gost(list("WT_vs_Other" = filtered_WT_Other_ordered$gene), organism = "mmusculus", ordered_query = TRUE)
+
+
+top_10_go_for_table <- data.frame(head(WT_Other_ordered$result, 10)) 
+top_10_go_for_table_GO_Terms <- c(top_10_go_for_table$term_id)
+top_10_go_for_table_GO_Terms
+
+#Homo vs WT Plot
+p1 <- gostplot(WT_Other_ordered, capped= FALSE, interactive = FALSE, )
+
+#Homo vs WT Plot with highlight table 
+publish_other_wt <- publish_gostplot(p1, highlight_terms = top_10_go_for_table_GO_Terms)
+ggsave("other_wt_gprofiler_table.png", publish_other_wt, width = 15, height = 10, dpi = 300)
+
+
+WT_Other_mod <- WT_Other_ordered$result[,c("query","source","term_id","term_name","p_value","query_size","intersection_size","term_size","effective_domain_size", "source_order")]
+
+WT_Other_mod$GeneRatio = paste0(WT_Other_mod$intersection_size, "/", WT_Other_mod$query_size)
+
+WT_Other_mod$BgRatio = paste0(WT_Other_mod$term_size, "/", WT_Other_mod$effective_domain_size)
+
+names(WT_Other_mod) = c("Cluster", "Category", "ID", "Description", "p.adjust", 
+                    "query_size", "Count", "term_size", "effective_domain_size", 
+                    "geneID", "GeneRatio", "BgRatio")
+
+WT_Other_mod$geneID = gsub(",", "/", WT_Other_mod$geneID)
+
+row.names(WT_Other_mod) = WT_Other_mod$ID
+
+#define as compareClusterResult object
+WT_Other_mod_cluster = new("compareClusterResult", compareClusterResult = WT_Other_mod)
+
+
+#define as enrichResult object
+WT_Other_mod_enrich = new("enrichResult", result = WT_Other_mod)
+
+enrichplot::dotplot(WT_Other_mod_cluster)
+
+#Bar plot of enrichment 
+WT_other_enrich_bar <- barplot(WT_Other_mod_enrich, showCategory = 10, font.size = 14) +
+  ggplot2::facet_grid(~Cluster) +
+  ggplot2::ylab("Term Name")
+
+ggsave("WT_other_enrich_bar.png", WT_other_enrich_bar, width = 8, height = 6, dpi = 300)
+
+```
+
+## gProfiler2 for RXN Group 
+```{r}
+
+install.packages("gprofiler2")
+library(gprofiler2)
+
+#filter Rx Genes for pvalues less than 0.05
+filtered_Rx <- RxGenes %>%
+  filter(RxGenes$padj < 0.05)
+filtered_Rx
+
+GO_Terms_Rx<- data.frame(gconvert(query = filtered_Rx$gene, organism = "mmusculus",
+         target="ENSG", mthreshold = Inf, filter_na = TRUE))
+GO_Terms_Rx
+
+results_GSEA_Rx <- gost(query = filtered_Rx$gene, organism = "mmusculus")
+
+results_GSEA_Rx
+plot_Rx <- gostplot(results_GSEA_Rx, capped= FALSE, interactive= TRUE)
+
+plot_Rx
+
+#Order genes by log2FC
+filtered_Rx_ordered <- filtered_Rx[order(filtered_Rx$log2FoldChange, decreasing = TRUE),]
+
+#ordered enrichment analysis
+Rx_ordered <- gost(list("Control_vs_Rx" = filtered_Rx_ordered$gene), organism = "mmusculus", ordered_query = TRUE)
+
+
+top_10_go_for_table <- data.frame(head(Rx_ordered$result, 10)) 
+top_10_go_for_table_GO_Terms <- c(top_10_go_for_table$term_id)
+top_10_go_for_table_GO_Terms
+
+#Rx Plot
+p1 <- gostplot(Rx_ordered, capped= FALSE, interactive = FALSE, )
+
+#Rx Plot with highlight table 
+publish_Rx <- publish_gostplot(p1, highlight_terms = top_10_go_for_table_GO_Terms)
+ggsave("Rx_gprofiler_table.png", publish_Rx, width = 15, height = 10, dpi = 300)
+
+
+Rx_mod <- Rx_ordered$result[,c("query","source","term_id","term_name","p_value","query_size","intersection_size","term_size","effective_domain_size", "source_order")]
+
+Rx_mod$GeneRatio = paste0(Rx_mod$intersection_size, "/", Rx_mod$query_size)
+
+Rx_mod$BgRatio = paste0(Rx_mod$term_size, "/", Rx_mod$effective_domain_size)
+
+names(Rx_mod) = c("Cluster", "Category", "ID", "Description", "p.adjust", 
+                    "query_size", "Count", "term_size", "effective_domain_size", 
+                    "geneID", "GeneRatio", "BgRatio")
+
+Rx_mod$geneID = gsub(",", "/", Rx_mod$geneID)
+
+row.names(Rx_mod) = Rx_mod$ID
+
+#define as compareClusterResult object
+Rx_mod_cluster = new("compareClusterResult", compareClusterResult = Rx_mod)
+
+
+#define as enrichResult object
+Rx_mod_enrich = new("enrichResult", result = Rx_mod)
+
+enrichplot::dotplot(Rx_mod_cluster)
+
+#Bar plot of enrichment 
+Rx_enrich_bar <- barplot(Rx_mod_enrich, showCategory = 10, font.size = 14) +
+  ggplot2::facet_grid(~Cluster) +
+  ggplot2::ylab("Term Name")
+
+ggsave("Rx_enrich_bar.png", Rx_enrich_bar, width = 8, height = 6, dpi = 300)
+
+```
+
+## Gene Ontology for Wild Type vs. Homozygous Knockout
+```{r}
+#Gene Ontology
+
+BiocManager::install("org.Mm.eg.db")
+library(org.Mm.eg.db)
+library(AnnotationDbi)
+
+#convert entrez to ensmbl
+WT_Homo_ENSG_convert <- gconvert(filtered_WT_HOMO_ordered$gene, organism = "mmusculus", target = "ENSG")
+
+WT_Homo_ENSG_convert
+
+
+#remove duplicates 
+WT_Homo_ENSG_convert <- WT_Homo_ENSG_convert %>%
+  distinct(name, .keep_all = TRUE) %>%
+  distinct(input, .keep_all = TRUE)
+
+WT_Homo_ENSG_convert <- WT_Homo_ENSG_convert %>%
+  filter(input %in% filtered_WT_HOMO_ordered$gene)
+
+#remove rows with no ENSG match
+filtered_WT_HOMO_ordered <- filtered_WT_HOMO_ordered %>%
+  filter(gene %in% WT_Homo_ENSG_convert$input)
+
+setdiff(WT_Homo_ENSG_convert$input, filtered_WT_HOMO_ordered$gene)
+
+
+WT_Homo_ENSG_for_enrich <- filtered_WT_HOMO_ordered %>%
+  mutate(gene = WT_Homo_ENSG_convert$target)
+
+WT_Homo_ENSG_for_enrich
+
+
+#enrichGO
+gse_wthomo_enrich <- enrichGO(WT_Homo_ENSG_for_enrich$gene,
+ont = "ALL",
+minGSSize = 3,
+maxGSSize = 800,
+keyType = "ENSEMBL",
+pvalueCutoff = 0.05,
+OrgDb = org.Mm.eg.db,
+pAdjustMethod = "hochberg")
+
+gse_wthomo_enrich
+
+og_gse_wthomo_list <- WT_Homo_ENSG_for_enrich$log2FoldChange
+
+names(og_gse_wthomo_list) <- WT_Homo_ENSG_for_enrich$gene
+
+final_gse_wthomo_list <- na.omit(og_gse_wthomo_list)
+final_gse_wthomo_list <- sort(og_gse_wthomo_list, decreasing = TRUE)
+
+gse_wthomo <- gseGO(geneList = final_gse_wthomo_list,
+                    ont = "ALL",
+                    keyType = "ENSEMBL",
+                    minGSSize = 3,
+                    maxGSSize = 800,
+                    pvalueCutoff = 1,
+                    nPermSimple = 10000,
+                    verbose = TRUE,
+                    OrgDb = org.Mm.eg.db,
+                    pAdjustMethod = "hochberg")
+
+gse_wthomo
+
+install.packages('ggridges')
+library(ggridges)
+library(ggplot2)
+
+#barplot on enriched pathways 
+wt_homo_bar <- barplot(gse_wthomo_enrich, showCategory=10) + labs(title = "Wild Type vs. Homozygous Knockout")
+ggsave("wt_homo_bar.png", wt_homo_bar, width = 8, height = 6, dpi = 300)
+
+
+#ridgeplots of enriched pathways
+wt_homo_ridge <- ridgeplot(gse_wthomo, label_format = 80) + labs(x = "enrichment distribution", title = "Wild Type vs. Homozygous Knockout") + theme(axis.text.y = element_text(margin = margin(100000)))
+ggsave("wt_homo_ridge.png", wt_homo_ridge, width = 15, height = 10, dpi = 300)
+
+```
+
+## Gene Ontology for Wild Type vs. Other
+```{r}
+#Gene Ontology
+
+BiocManager::install("org.Mm.eg.db")
+library(org.Mm.eg.db)
+library(AnnotationDbi)
+
+#convert entrez to ensmbl
+WT_Other_ENSG_convert <- gconvert(filtered_WT_Other_ordered$gene, organism = "mmusculus", target = "ENSG")
+
+WT_Other_ENSG_convert
+
+
+#remove duplicates 
+WT_Other_ENSG_convert <- WT_Other_ENSG_convert %>%
+  distinct(name, .keep_all = TRUE) %>%
+  distinct(input, .keep_all = TRUE)
+
+WT_Other_ENSG_convert <- WT_Other_ENSG_convert %>%
+  filter(input %in% filtered_WT_Other_ordered$gene)
+
+#remove rows with no ENSG match
+filtered_WT_Other_ordered <- filtered_WT_Other_ordered %>%
+  filter(gene %in% WT_Other_ENSG_convert$input)
+
+setdiff(WT_Other_ENSG_convert$input, filtered_WT_Other_ordered$gene)
+
+
+WT_Other_ENSG_for_enrich <- filtered_WT_Other_ordered %>%
+  mutate(gene = WT_Other_ENSG_convert$target)
+
+WT_Other_ENSG_for_enrich
+
+
+#enrichGO
+gse_wtOther_enrich <- enrichGO(WT_Other_ENSG_for_enrich$gene,
+ont = "ALL",
+minGSSize = 3,
+maxGSSize = 800,
+keyType = "ENSEMBL",
+pvalueCutoff = 0.05,
+OrgDb = org.Mm.eg.db,
+pAdjustMethod = "hochberg")
+
+gse_wtOther_enrich
+
+og_gse_wtOther_list <- WT_Other_ENSG_for_enrich$log2FoldChange
+
+names(og_gse_wtOther_list) <- WT_Other_ENSG_for_enrich$gene
+
+final_gse_wtOther_list <- na.omit(og_gse_wtOther_list)
+final_gse_wtOther_list <- sort(og_gse_wtOther_list, decreasing = TRUE)
+
+gse_wtOther <- gseGO(geneList = final_gse_wtOther_list,
+                    ont = "ALL",
+                    keyType = "ENSEMBL",
+                    minGSSize = 3,
+                    maxGSSize = 800,
+                    pvalueCutoff = 1,
+                    nPermSimple = 10000,
+                    verbose = TRUE,
+                    OrgDb = org.Mm.eg.db,
+                    pAdjustMethod = "hochberg")
+
+gse_wtOther
+
+install.packages('ggridges')
+library(ggridges)
+library(ggplot2)
+
+#barplot on enriched pathways 
+wt_Other_bar <- barplot(gse_wtOther_enrich, showCategory=10) + labs(title = "Wild Type vs. Other Knockout")
+ggsave("wt_Other_bar.png", wt_Other_bar, width = 8, height = 6, dpi = 300)
+
+
+#ridgeplots of enriched pathways
+wt_Other_ridge <- ridgeplot(gse_wtOther, label_format = 80) + labs(x = "enrichment distribution", title = "Wild Type vs. Other Knockout") + theme(axis.text.y = element_text(margin = margin(100000)))
+ggsave("wt_Other_ridge.png", wt_Other_ridge, width = 15, height = 10, dpi = 300)
+
+```
+
+
+## Gene Ontology for Rx
+```{r}
+#Gene Ontology
+
+BiocManager::install("org.Mm.eg.db")
+library(org.Mm.eg.db)
+library(AnnotationDbi)
+
+#convert entrez to ensmbl
+Rx_ENSG_convert <- gconvert(filtered_Rx_ordered$gene, organism = "mmusculus", target = "ENSG")
+
+Rx_ENSG_convert
+
+
+#remove duplicates 
+Rx_ENSG_convert <- Rx_ENSG_convert %>%
+  distinct(name, .keep_all = TRUE) %>%
+  distinct(input, .keep_all = TRUE)
+
+Rx_ENSG_convert <- Rx_ENSG_convert %>%
+  filter(input %in% filtered_Rx_ordered$gene)
+
+#remove rows with no ENSG match
+filtered_Rx_ordered <- filtered_Rx_ordered %>%
+  filter(gene %in% Rx_ENSG_convert$input)
+
+setdiff(Rx_ENSG_convert$input, filtered_Rx_ordered$gene)
+
+
+Rx_ENSG_for_enrich <- filtered_Rx_ordered %>%
+  mutate(gene = Rx_ENSG_convert$target)
+
+Rx_ENSG_for_enrich
+
+
+#enrichGO
+gse_Rx_enrich <- enrichGO(Rx_ENSG_for_enrich$gene,
+ont = "ALL",
+minGSSize = 3,
+maxGSSize = 800,
+keyType = "ENSEMBL",
+pvalueCutoff = 0.05,
+OrgDb = org.Mm.eg.db,
+pAdjustMethod = "hochberg")
+
+gse_Rx_enrich
+
+og_gse_Rx_list <- Rx_ENSG_for_enrich$log2FoldChange
+
+names(og_gse_Rx_list) <- Rx_ENSG_for_enrich$gene
+
+final_gse_Rx_list <- na.omit(og_gse_Rx_list)
+final_gse_Rx_list <- sort(og_gse_Rx_list, decreasing = TRUE)
+
+gse_Rx <- gseGO(geneList = final_gse_Rx_list,
+                    ont = "ALL",
+                    keyType = "ENSEMBL",
+                    minGSSize = 3,
+                    maxGSSize = 800,
+                    pvalueCutoff = 1,
+                    nPermSimple = 10000,
+                    verbose = TRUE,
+                    OrgDb = org.Mm.eg.db,
+                    pAdjustMethod = "hochberg")
+
+gse_Rx
+
+install.packages('ggridges')
+library(ggridges)
+library(ggplot2)
+
+#barplot on enriched pathways 
+Rx_bar <- barplot(gse_Rx_enrich, showCategory=10) + labs(title = "Control vs. Treatment")
+ggsave("Rx_bar.png", Rx_bar, width = 8, height = 6, dpi = 300)
+
+
+#ridgeplots of enriched pathways
+Rx_ridge <- ridgeplot(gse_Rx, label_format = 80) + labs(x = "enrichment distribution", title = "Control vs. Treatment") + theme(axis.text.y = element_text(margin = margin(100000)))
+ggsave("Rx_ridge.png", Rx_ridge, width = 15, height = 10, dpi = 300)
+
+```
+
+## KEGG for WT vs Homozygous Knockout 
+```{r}
+#KEGG
+
+WT_Homo_ENTREZID_convert <- gconvert(filtered_WT_HOMO_ordered$gene, organism = "mmusculus", target = "ENTREZGENE_ACC")
+
+WT_Homo_KEGG <- enrichKEGG(WT_Homo_ENTREZID_convert$target,
+                           organism = "mmu",
+                           minGSSize = 3,
+                           maxGSSize = 800,
+                           pvalueCutoff = 0.05,
+                           pAdjustMethod = "BH",
+                           keyType ="kegg")
+
+WT_Homo_KEGG
+
+pathview(WT_Homo_ENTREZID_convert$target, pathway.id = "mmu04657", species = "mmu")
+knitr::include_graphics("mmu04657.pathview.png")
+```
+
+## KEGG for WT vs Other
+```{r}
+#KEGG
+
+WT_Other_ENTREZID_convert <- gconvert(filtered_WT_Other_ordered$gene, organism = "mmusculus", target = "ENTREZGENE_ACC")
+
+WT_Other_KEGG <- enrichKEGG(WT_Other_ENTREZID_convert$target,
+                           organism = "mmu",
+                           minGSSize = 3,
+                           maxGSSize = 800,
+                           pvalueCutoff = 0.05,
+                           pAdjustMethod = "BH",
+                           keyType ="kegg")
+
+WT_Other_KEGG
+
+pathview(WT_Other_ENTREZID_convert$target, pathway.id = "mmu04061", species = "mmu")
+knitr::include_graphics("mmu04061.pathview.png")
+```
+
+## KEGG for Rx
+```{r}
+#KEGG
+
+Rx_ENTREZID_convert <- gconvert(filtered_Rx_ordered$gene, organism = "mmusculus", target = "ENTREZGENE_ACC")
+
+Rx_KEGG <- enrichKEGG(Rx_ENTREZID_convert$target,
+                           organism = "mmu",
+                           minGSSize = 3,
+                           maxGSSize = 800,
+                           pvalueCutoff = 0.05,
+                           pAdjustMethod = "BH",
+                           keyType ="kegg")
+
+Rx_KEGG
+
+pathview(Rx_ENTREZID_convert$target, pathway.id = "mmu04010", species = "mmu")
+knitr::include_graphics("mmu04010.pathview.png")
+```
